@@ -93,11 +93,17 @@ end
 
 couchdb_config '/usr/local/etc/couchdb'
 
+execute 'systemctl-daemon-reload' do
+  command '/bin/systemctl --system daemon-reload'
+  action :nothing
+end
+
 cookbook_file '/etc/init.d/couchdb' do
   source 'couchdb.init'
   owner 'root'
   group 'root'
   mode '0755'
+  notifies :run, 'execute[systemctl-daemon-reload]', :immediately 
 end
 
 service 'couchdb' do
