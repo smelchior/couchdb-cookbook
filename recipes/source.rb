@@ -33,7 +33,14 @@ when 'debian'
   dev_pkgs << 'libcurl4-openssl-dev'
   dev_pkgs << value_for_platform(
     'debian' => { 
-      'default' => 'libmozjs185-dev'
+      ['~> 7.0', '< 9.0'] => 'libmozjs185-dev',
+      'default' => 'libmozjs-dev'
+    },
+    'ubuntu' => {
+      '10.04' => 'xulrunner-dev',
+      '14.04' => 'libmozjs185-dev',
+      '16.04' => 'libmozjs185-dev',
+      'default' => 'libmozjs-dev'
     }
   )
 
@@ -46,8 +53,11 @@ when 'rhel', 'fedora'
   }
 
   # awkwardly tell ./configure where to find Erlang's headers
-  bitness = node['kernel']['machine'] =~ /64/ ? 'lib64' : 'lib'
-  compile_flags = "--with-erlang=/usr/#{bitness}/erlang/usr/include"
+  if Dir.exists?("/usr/lib64/erlang/usr/include")
+    compile_flags = "--with-erlang=/usr/lib64/erlang/usr/include"
+  else
+    compile_flags = "--with-erlang=/usr/lib/erlang/usr/include"
+  end
 end
 
 include_recipe 'erlang' if node['couch_db']['install_erlang']
